@@ -1,0 +1,189 @@
+---
+title: "Daniel Sánchez's CV"
+author: Daniel Sánchez
+date: "`r Sys.Date()`"
+params:
+  pdf_mode:
+    value: false
+output:
+  pagedown::html_resume:
+    css: ['dd_cv.css', 'resume']
+    self_contained: true
+---
+<meta charset="utf-8"> 
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(
+  results='asis', 
+  echo = FALSE
+)
+
+library(magrittr) # For the pipe
+library(fontawesome) # For icons
+library(tidyverse)
+library(showtext) # For custom fonts in ggplot
+source("cv_printing_functions.r")
+
+# Read in all data and initialize a CV printer object
+CV <- create_CV_object(
+  data_location = "https://docs.google.com/spreadsheets/d/1yOBU3kymAWXtOY60zPzBOmA45xm-YdYek0GDipeAVvo/edit?usp=sharing", 
+  pdf_mode = params$pdf_mode
+)
+
+# Add a custom font
+
+CV$entries_data<-
+  CV$entries_data %>% 
+  filter(acad_resume == T)
+
+font_add_google("Exo", family = "Exo")
+
+showtext_auto()
+
+```
+
+
+```{r}
+# When in pdf export mode the little dots are unaligned, so fix that with some conditional CSS.
+if(params$pdf_mode) {
+    cat("
+<style>
+:root{
+  --decorator-outer-offset-left: -6.5px;
+}
+</style>")
+}
+```
+
+Aside
+================================================================================
+
+Contact {#contact}
+--------------------------------------------------------------------------------
+```{r}
+CV %>% print_contact_info
+```
+
+<center>
+
+[`r fa('envelope', fill = 'black', height = '2em')`](mailto:dsanchezp998@gmail.com)
+[`r fa('linkedin', fill = 'black', height = '2em')`](https://www.linkedin.com/in/dsanchezp18/)
+[`r fa('github', fill = 'black', height = '2em')`](https://github.com/dsanchezp18)
+[`r fa('link', fill = 'black', height = '2em')`](https://daniel-ec.netlify.app)
+[`r fa('twitter', fill = 'black', height = '2em')`](https://twitter.com/daniel_ec18)
+[`r fa('book', fill = 'black', height = '2em')`](https://scholar.google.com/citations?user=Xt2yEYgAAAAJ&hl=en)
+[`r fa('r', fill = 'black', height = '2em')`](https://rpubs.com/dsanchezp998)
+
+<center>
+
+Languages
+--------------------------------------------------------------------------------
+
+**Spanish**: Native
+
+**English**: Advanced
+
+**French**: Basic
+
+Skills {#skills}
+--------------------------------------------------------------------------------
+
+```{r, fig.height= 8}
+CV$skills %>%
+  mutate(skill2 = fct_reorder(skill, level)) %>% 
+  ggplot(aes(skill2, level, label = label))+
+  geom_col(fill = '#484848' )+
+  coord_flip()+
+  theme(
+      panel.background = element_rect(fill='transparent'), #transparent panel bg
+      plot.background = element_rect(fill='#d6d6d6', color = '#d6d6d6'), #transparent plot bg
+      panel.grid.major = element_blank(), #remove major gridlines
+      panel.grid.minor = element_blank(), #remove minor gridlines
+      legend.background = element_rect(fill='transparent'), #transparent legend bg
+      legend.box.background = element_rect(fill='transparent'), #transparent legend panel
+      axis.ticks = element_blank(),
+      axis.text.x = element_blank(),
+      axis.text.y = element_text(hjust = -0.005),
+      rect = element_rect(fill = 'transparent'),
+      text = element_text(size = 65, family = 'Exo', color = 'black'),
+      )+
+  labs(y = '',
+       x = '')
+  
+
+```
+
+Disclaimer {#disclaimer}
+--------------------------------------------------------------------------------
+
+Made with the R packages [**datadrivencv**](https://github.com/nstrayer/datadrivencv) and [**pagedown**](https://github.com/rstudio/pagedown).
+
+The source code is available [on my GitHub profile](https://github.com/dsanchezp18/automated-cv-dsp).
+
+Last updated on `r format(Sys.Date(), format = '%B %Y')`.
+
+Main
+================================================================================
+
+Daniel Sánchez {#title}
+--------------------------------------------------------------------------------
+
+```{r}
+# Note the special double pipe so we modify the CV object in place
+CV %<>% print_text_block("intro") 
+```
+
+Education {data-icon=graduation-cap data-concise=true}
+--------------------------------------------------------------------------------
+
+```{r}
+CV %<>% print_section('education')
+```
+
+Research Experience {data-icon=chalkboard-teacher}
+--------------------------------------------------------------------------------
+
+```{r}
+CV %<>% print_section('research_positions')
+```
+
+Research {data-icon=book}
+--------------------------------------------------------------------------------
+```{r}
+CV %<>% print_section('academic_articles')
+```
+
+::: aside
+```{r}
+CV %<>% print_text_block('research_experience_aside')
+```
+:::
+
+Teaching Experience {data-icon=chalkboard-teacher}
+--------------------------------------------------------------------------------
+
+```{r}
+CV %<>% print_section('teaching_positions')
+```
+
+Affiliations {data-icon=star}
+--------------------------------------------------------------------------------
+
+```{r}
+CV %<>% print_section('extras')
+```
+
+
+Industry Experience {data-icon=briefcase}
+--------------------------------------------------------------------------------
+
+```{r}
+CV %<>% print_section('industry_positions')
+```
+
+Additional Education {data-icon=area-chart}
+--------------------------------------------------------------------------------
+
+```{r}
+CV %<>% print_section('certificates')
+```
